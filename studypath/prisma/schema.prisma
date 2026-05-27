@@ -1,0 +1,147 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  student
+  admin
+}
+
+enum VarkMode {
+  visual
+  auditory
+  read_write
+  kinesthetic
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+/// An authenticated user — either a student or an admin.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(student)
+  createdAt    DateTime @default(now())
+
+  sessions         Session[]
+  learningProfiles LearningStyleProfile[]
+
+  @@map("users")
+}
+
+/// A study subject (Physics, Math, English).
+model Subject {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique          // "physics" | "math" | "english"
+
+  questions        Question[]
+  sessions         Session[]
+  learningProfiles LearningStyleProfile[]
+
+  @@map("subjects")
+}
+
+/// A single question in the question bank.
+model Question {
+  id            String     @id @default(cuid())
+  subjectId     String
+  text          String
+  mode          VarkMode
+  difficulty    Difficulty @default(medium)
+  /// JSON array of answer option strings, e.g. ["15 N","50 N","150 N","0 N"]
+  options       Json
+  /// Must exactly match one of the strings in options[]
+  correctAnswer String
+  explanation   String
+  createdAt     DateTime   @default(now())
+
+  subject        Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  sessionAnswers SessionAnswer[]
+
+  @@index([subjectId, mode])
+  @@map("questions")
+}
+
+/// One study session: a student answers 10 questions in a given mode.
+model Session {
+  id            String    @id @default(cuid())
+  userId        String
+  subjectId     String
+  mode          VarkMode
+  startedAt     DateTime  @default(now())
+  /// Null until the student submits the session
+  endedAt       DateTime?
+  /// 0–100 percentage correct
+  score         Float?
+  /// Average of all confidenceRating values (1–5) in this session
+  avgConfidence Float?
+  /// Number of times the student navigated back to re-read a question
+  revisitCount  Int       @default(0)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  answers SessionAnswer[]
+
+  @@index([userId, subjectId])
+  @@index([userId, startedAt])
+  @@map("sessions")
+}
+
+/// One student's answer to one question within a session.
+model SessionAnswer {
+  id               String  @id @default(cuid())
+  sessionId        String
+  questionId       String
+  /// The option string the student chose
+  selectedAnswer   String
+  isCorrect        Boolean
+  /// Wall-clock seconds from question display to answer submission
+  timeSpentSeconds Int
+  /// Student's self-reported confidence: 1 (not confident) – 5 (very confident)
+  confidenceRating Int
+
+  session  Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("session_answers")
+}
+
+/// Tracks the adaptive engine state for one student × one subject.
+model LearningStyleProfile {
+  id              String    @id @default(cuid())
+  userId          String
+  subjectId       String
+  /// Set once we have enough data (>= 20 sessions + 20% threshold met)
+  dominantMode    VarkMode?
+  /// Once locked, we serve dominantMode every session (with periodic probes)
+  isLocked        Boolean   @default(false)
+  /// Total completed sessions for this student × subject pair
+  sessionCount    Int       @default(0)
+  /// Timestamp of the last weighted-score evaluation run
+  lastEvaluatedAt DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId])
+  @@map("learning_style_profiles")
+}

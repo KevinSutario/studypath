@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study Path — Adaptive Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --indigo-50:  #EEF2FF;
+    --indigo-100: #E0E7FF;
+    --indigo-200: #C7D2FE;
+    --indigo-300: #A5B4FC;
+    --indigo-400: #818CF8;
+    --indigo-500: #6366F1;
+    --indigo-600: #4F46E5;
+    --indigo-700: #4338CA;
+    --indigo-900: #1E1B4B;
+
+    --warm-white: #FAFAFA;
+    --paper:      #FFFFFF;
+    --ink:        #1E1B4B;
+    --ink-2:      #4B4870;
+    --ink-3:      #8783A8;
+    --hairline:   #ECEAF5;
+
+    --visual:     #7C3AED;
+    --visual-50:  #F3EBFF;
+    --auditory:   #0EA5E9;
+    --auditory-50:#E0F4FE;
+    --readwrite:  #10B981;
+    --readwrite-50:#DEFAEC;
+    --kines:      #F59E0B;
+    --kines-50:   #FFF2D6;
+
+    --shadow-sm: 0 1px 2px rgba(30, 27, 75, 0.04), 0 1px 1px rgba(30,27,75,0.03);
+    --shadow-md: 0 4px 14px rgba(30, 27, 75, 0.06), 0 2px 4px rgba(30, 27, 75, 0.04);
+    --shadow-lg: 0 24px 60px rgba(30, 27, 75, 0.10), 0 8px 20px rgba(30, 27, 75, 0.06);
+
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
+    --r-2xl: 28px;
+    --r-pill: 999px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
+  ::selection { background: var(--indigo-200); color: var(--indigo-900); }
+
+  /* Demo chrome --------------------------------------------------- */
+  .demo-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+  }
+  .demo-nav {
+    background: var(--paper);
+    border-right: 1px solid var(--hairline);
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 50;
+  }
+  .demo-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 22px 8px;
+    border-bottom: 1px solid var(--hairline);
+    margin-bottom: 14px;
+  }
+  .demo-nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    padding: 14px 10px 6px;
+  }
+  .demo-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    color: var(--ink-2);
+    font-weight: 500;
+    font-size: 14px;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .demo-nav-item:hover { background: var(--indigo-50); color: var(--indigo-700); }
+  .demo-nav-item.is-active { background: var(--indigo-600); color: white; }
+  .demo-nav-item.is-active .demo-nav-num { background: rgba(255,255,255,0.18); color: white; }
+  .demo-nav-num {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--indigo-50);
+    color: var(--indigo-600);
+    font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .demo-stage {
+    min-height: 100vh;
+    background: var(--warm-white);
+    position: relative;
+  }
+  .demo-footer {
+    margin-top: auto;
+    padding: 14px 10px 4px;
+    border-top: 1px solid var(--hairline);
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.5;
+  }
+
+  /* Shared components --------------------------------------------- */
+  .ll-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  .ll-logo-mark {
+    width: 28px; height: 28px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--indigo-600), var(--indigo-400));
+    position: relative;
+    box-shadow: 0 6px 14px -4px rgba(79, 70, 229, 0.5);
+  }
+  .ll-logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 2px solid white;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    transform: rotate(45deg);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .pill.visual    { background: var(--visual-50);   color: var(--visual); }
+  .pill.visual .dot { background: var(--visual); }
+  .pill.auditory  { background: var(--auditory-50); color: var(--auditory); }
+  .pill.auditory .dot { background: var(--auditory); }
+  .pill.readwrite { background: var(--readwrite-50);color: var(--readwrite); }
+  .pill.readwrite .dot { background: var(--readwrite); }
+  .pill.kines     { background: var(--kines-50);    color: #B45309; }
+  .pill.kines .dot { background: var(--kines); }
+  .pill.neutral   { background: var(--indigo-50);   color: var(--indigo-700); }
+  .pill.neutral .dot { background: var(--indigo-500); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: var(--r-pill);
+    border: 0;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  }
+  .btn-primary {
+    background: var(--indigo-600);
+    color: white;
+    box-shadow: 0 8px 20px -8px rgba(79,70,229,0.6);
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--indigo-700); box-shadow: 0 12px 26px -8px rgba(79,70,229,0.6); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+  }
+  .btn-ghost:hover { background: var(--indigo-50); border-color: var(--indigo-200); color: var(--indigo-700); }
+  .btn-soft {
+    background: var(--indigo-50);
+    color: var(--indigo-700);
+  }
+  .btn-soft:hover { background: var(--indigo-100); }
+
+  .card {
+    background: var(--paper);
+    border-radius: var(--r-2xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--hairline);
+  }
+
+  .stage-pad {
+    padding: 32px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Top nav inside app screens ------------------------------------ */
+  .app-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(250,250,250,0.85);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid var(--hairline);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .app-nav .nav-links { display:flex; gap: 6px; }
+  .app-nav .nav-link {
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    background: transparent;
+    border: 0;
+  }
+  .app-nav .nav-link:hover { color: var(--indigo-700); background: var(--indigo-50); }
+  .app-nav .nav-link.is-active { color: var(--indigo-700); background: var(--indigo-100); font-weight: 600; }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FCA5A5, #F472B6);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 13px;
+    border: 2px solid white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Utility helpers ----------------------------------------------- */
+  .h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+  .h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin: 0; }
+  .h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.005em; margin: 0; }
+  .muted { color: var(--ink-3); }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeUp 320ms ease-out both; }
+
+  /* Responsive (small): drop the demo nav into a top bar */
+  @media (max-width: 900px) {
+    .demo-shell { grid-template-columns: 1fr; }
+    .demo-nav {
+      position: relative; height: auto;
+      flex-direction: row; flex-wrap: wrap; gap: 6px;
+      padding: 12px;
+      border-right: 0; border-bottom: 1px solid var(--hairline);
+    }
+    .demo-nav-brand, .demo-nav-label, .demo-footer { display: none; }
+    .demo-nav-item { padding: 8px 10px; font-size: 12px; }
+    .stage-pad { padding: 20px; }
+    .app-nav { padding: 12px 16px; }
+    .h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- React -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- App scripts -->
+<script type="text/babel" src="src/icons.jsx"></script>
+<script type="text/babel" src="src/shared.jsx"></script>
+<script type="text/babel" src="src/login.jsx"></script>
+<script type="text/babel" src="src/dashboard.jsx"></script>
+<script type="text/babel" src="src/study.jsx"></script>
+<script type="text/babel" src="src/analytics.jsx"></script>
+<script type="text/babel" src="src/admin.jsx"></script>
+<script type="text/babel" src="src/app.jsx"></script>
+
+</body>
+</html>
